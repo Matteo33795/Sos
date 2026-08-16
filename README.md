@@ -19,6 +19,13 @@ consultazione dei dati già caricati.
    repository ed esegui (▶ Run). Questo crea tutte le tabelle, i trigger
    che aggiornano automaticamente le giacenze e le regole di sicurezza
    (RLS) che permettono l'accesso solo agli utenti autenticati.
+
+   ⚠️ **Attenzione a come copi il file**: se lo apri tramite un'app di note,
+   una chat o un editor con formattazione automatica, alcuni caratteri
+   possono venire alterati e la query fallisce con un errore di sintassi.
+   Per essere sicuri, apri il file su GitHub, clicca il pulsante **"Raw"**
+   (o l'icona di copia in alto a destra del file) e incolla direttamente
+   da lì nell'SQL Editor di Supabase, senza passare da altre app.
 3. Vai su **Project Settings → API**: copia **Project URL** e la chiave
    **anon public**. Non sono segrete (sono pensate per essere usate nel
    browser), ma vanno comunque prese da qui.
