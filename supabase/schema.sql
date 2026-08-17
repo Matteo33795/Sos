@@ -145,9 +145,19 @@ create table if not exists public.movimenti (
   tipo text not null check (tipo in ('carico', 'scarico')),
   quantita numeric not null check (quantita > 0),
   note text,
-  utente_id uuid not null references auth.users (id),
+  -- Riferimento a public.profiles (non auth.users) per permettere a
+  -- PostgREST di risolvere l'embedding movimenti -> profiles usato dalla UI
+  -- per mostrare il nome di chi ha registrato il movimento.
+  utente_id uuid not null references public.profiles (id),
   creato_il timestamptz not null default now()
 );
+
+-- Se la tabella esisteva gia' con il vecchio riferimento a auth.users,
+-- questi due comandi correggono il collegamento senza perdere i dati.
+alter table public.movimenti drop constraint if exists movimenti_utente_id_fkey;
+alter table public.movimenti
+  add constraint movimenti_utente_id_fkey
+  foreign key (utente_id) references public.profiles (id);
 
 alter table public.movimenti enable row level security;
 
@@ -211,3 +221,7 @@ create trigger on_movimento_creato
 create index if not exists idx_materiali_nome on public.materiali using gin (to_tsvector('simple', nome));
 create index if not exists idx_movimenti_materiale on public.movimenti (materiale_id, creato_il desc);
 create index if not exists idx_giacenze_materiale on public.giacenze (materiale_id);
+
+-- Forza PostgREST a rileggere lo schema, cosi' le nuove relazioni tra
+-- tabelle sono visibili subito alle query dell'app senza dover aspettare.
+notify pgrst, 'reload schema';
