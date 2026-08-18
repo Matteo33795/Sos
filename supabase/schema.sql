@@ -190,10 +190,16 @@ create policy "Un utente puo' cancellare le proprie iscrizioni"
 create table if not exists public.app_config (
   id boolean primary key default true check (id),
   edge_function_url text,
-  edge_function_secret text
+  edge_function_secret text,
+  -- Chiave "publishable"/anon del progetto: alcune Edge Function restano
+  -- protette dalla verifica JWT di Supabase anche quando "Verify JWT" non
+  -- si riesce a disattivare dall'editor. Questa chiave viene inviata come
+  -- Authorization/apikey per superare quel controllo.
+  edge_function_anon_key text
 );
 
 insert into public.app_config (id) values (true) on conflict (id) do nothing;
+alter table public.app_config add column if not exists edge_function_anon_key text;
 
 alter table public.app_config enable row level security;
 
@@ -296,6 +302,7 @@ declare
   unita text;
   url text;
   segreto text;
+  chiave_anon text;
 begin
   select coalesce(sum(quantita), 0) into tot
   from public.giacenze
@@ -309,7 +316,8 @@ begin
   if tot <= minima and not gia_notificato then
     update public.materiali set sotto_scorta_notificato = true where id = new.materiale_id;
 
-    select edge_function_url, edge_function_secret into url, segreto
+    select edge_function_url, edge_function_secret, edge_function_anon_key
+    into url, segreto, chiave_anon
     from public.app_config where id = true;
 
     if url is not null and url <> '''' then
@@ -322,6 +330,11 @@ begin
           ''quantita_totale'', tot,
           ''quantita_minima'', minima,
           ''unita_misura'', unita
+        ),
+        headers := jsonb_build_object(
+          ''Content-Type'', ''application/json'',
+          ''apikey'', coalesce(chiave_anon, ''''),
+          ''Authorization'', ''Bearer '' || coalesce(chiave_anon, '''')
         )
       );
     end if;
