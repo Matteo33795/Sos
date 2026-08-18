@@ -15,11 +15,13 @@ create table if not exists public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "I profili sono visibili a tutti gli utenti autenticati" on public.profiles;
 create policy "I profili sono visibili a tutti gli utenti autenticati"
   on public.profiles for select
   to authenticated
   using (true);
 
+drop policy if exists "Un utente puo' modificare solo il proprio profilo" on public.profiles;
 create policy "Un utente puo' modificare solo il proprio profilo"
   on public.profiles for update
   to authenticated
@@ -55,21 +57,25 @@ create table if not exists public.ubicazioni (
 
 alter table public.ubicazioni enable row level security;
 
+drop policy if exists "Ubicazioni visibili agli utenti autenticati" on public.ubicazioni;
 create policy "Ubicazioni visibili agli utenti autenticati"
   on public.ubicazioni for select
   to authenticated
   using (true);
 
+drop policy if exists "Utenti autenticati possono creare ubicazioni" on public.ubicazioni;
 create policy "Utenti autenticati possono creare ubicazioni"
   on public.ubicazioni for insert
   to authenticated
   with check (true);
 
+drop policy if exists "Utenti autenticati possono modificare ubicazioni" on public.ubicazioni;
 create policy "Utenti autenticati possono modificare ubicazioni"
   on public.ubicazioni for update
   to authenticated
   using (true);
 
+drop policy if exists "Utenti autenticati possono eliminare ubicazioni" on public.ubicazioni;
 create policy "Utenti autenticati possono eliminare ubicazioni"
   on public.ubicazioni for delete
   to authenticated
@@ -97,21 +103,25 @@ alter table public.materiali add column if not exists sotto_scorta_notificato bo
 
 alter table public.materiali enable row level security;
 
+drop policy if exists "Materiali visibili agli utenti autenticati" on public.materiali;
 create policy "Materiali visibili agli utenti autenticati"
   on public.materiali for select
   to authenticated
   using (true);
 
+drop policy if exists "Utenti autenticati possono creare materiali" on public.materiali;
 create policy "Utenti autenticati possono creare materiali"
   on public.materiali for insert
   to authenticated
   with check (true);
 
+drop policy if exists "Utenti autenticati possono modificare materiali" on public.materiali;
 create policy "Utenti autenticati possono modificare materiali"
   on public.materiali for update
   to authenticated
   using (true);
 
+drop policy if exists "Utenti autenticati possono eliminare materiali" on public.materiali;
 create policy "Utenti autenticati possono eliminare materiali"
   on public.materiali for delete
   to authenticated
@@ -132,6 +142,7 @@ create table if not exists public.giacenze (
 
 alter table public.giacenze enable row level security;
 
+drop policy if exists "Giacenze visibili agli utenti autenticati" on public.giacenze;
 create policy "Giacenze visibili agli utenti autenticati"
   on public.giacenze for select
   to authenticated
@@ -154,16 +165,19 @@ create table if not exists public.push_subscriptions (
 
 alter table public.push_subscriptions enable row level security;
 
+drop policy if exists "Un utente vede solo le proprie iscrizioni" on public.push_subscriptions;
 create policy "Un utente vede solo le proprie iscrizioni"
   on public.push_subscriptions for select
   to authenticated
   using (auth.uid() = user_id);
 
+drop policy if exists "Un utente puo' iscrivere il proprio dispositivo" on public.push_subscriptions;
 create policy "Un utente puo' iscrivere il proprio dispositivo"
   on public.push_subscriptions for insert
   to authenticated
   with check (auth.uid() = user_id);
 
+drop policy if exists "Un utente puo' cancellare le proprie iscrizioni" on public.push_subscriptions;
 create policy "Un utente puo' cancellare le proprie iscrizioni"
   on public.push_subscriptions for delete
   to authenticated
@@ -209,11 +223,13 @@ alter table public.movimenti
 
 alter table public.movimenti enable row level security;
 
+drop policy if exists "Movimenti visibili agli utenti autenticati" on public.movimenti;
 create policy "Movimenti visibili agli utenti autenticati"
   on public.movimenti for select
   to authenticated
   using (true);
 
+drop policy if exists "Un utente puo' registrare movimenti a proprio nome" on public.movimenti;
 create policy "Un utente puo' registrare movimenti a proprio nome"
   on public.movimenti for insert
   to authenticated
